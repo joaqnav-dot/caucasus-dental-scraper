@@ -1,0 +1,48 @@
+name: Caucasus Dental Scraper
+
+on:
+  workflow_dispatch:
+    inputs:
+      queries_file:
+        description: 'Queries file to use (georgia.txt / queries.txt)'
+        required: true
+        default: 'queries.txt'
+        type: choice
+        options:
+          - queries.txt
+          - georgia.txt
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Pull scraper image
+        run: docker pull gosom/google-maps-scraper
+
+      - name: Run scraper
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/data \
+            gosom/google-maps-scraper \
+            -input  "/data/${{ github.event.inputs.queries_file }}" \
+            -results "/data/output.csv" \
+            -lang en \
+            -email \
+            -c 4
+
+      - name: Show results
+        run: |
+          echo "Total clinics scraped:"
+          tail -n +2 output.csv | wc -l
+
+      - name: Upload CSV as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dental-leads-${{ github.event.inputs.queries_file }}-${{ github.run_number }}
+          path: output.csv
+          retention-days: 30
