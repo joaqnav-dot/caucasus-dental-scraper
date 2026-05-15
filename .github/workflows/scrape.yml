@@ -11,6 +11,7 @@ on:
         options:
           - queries.txt
           - georgia.txt
+          - istanbul.txt
 
 jobs:
   scrape:

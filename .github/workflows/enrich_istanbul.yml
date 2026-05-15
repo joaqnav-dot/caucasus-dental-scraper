@@ -1,0 +1,171 @@
+name: Enrich Istanbul Leads
+
+on:
+  workflow_dispatch:
+    inputs:
+      scraper_run_id:
+        description: 'Run ID from Istanbul scraper job'
+        required: true
+        default: ''
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+
+  # ── Batch 1: Lado Europeo (primeras ~2000 clínicas) ──────────────────────────
+  enrich_europe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download scraper output
+        run: |
+          gh run download ${{ github.event.inputs.scraper_run_id }} \
+            --repo ${{ github.repository }} \
+            --pattern "caucasus-dental-leads-*" \
+            --dir ./downloaded
+          cp ./downloaded/*/output.csv ./output_full.csv
+          echo "Total rows: $(wc -l < output_full.csv)"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Split batch 1 (first half)
+        run: |
+          python3 -c "
+          import csv
+          rows = list(csv.DictReader(open('output_full.csv')))
+          half = len(rows) // 2
+          batch = rows[:half]
+          with open('batch1.csv','w',newline='',encoding='utf-8') as f:
+              w = csv.DictWriter(f, fieldnames=rows[0].keys())
+              w.writeheader(); w.writerows(batch)
+          print(f'Batch 1: {len(batch)} clinics')
+          "
+
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - run: pip install requests beautifulsoup4 duckduckgo-search
+
+      - name: Run enrichment batch 1
+        env:
+          INPUT_FILE: batch1.csv
+          OUTPUT_FILE: enriched_batch1.csv
+        run: python enrich.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: istanbul-enriched-batch1-run${{ github.run_number }}
+          path: enriched_batch1.csv
+          retention-days: 30
+
+  # ── Batch 2: Lado Asiático (segundas ~2000 clínicas) ─────────────────────────
+  enrich_asia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download scraper output
+        run: |
+          gh run download ${{ github.event.inputs.scraper_run_id }} \
+            --repo ${{ github.repository }} \
+            --pattern "caucasus-dental-leads-*" \
+            --dir ./downloaded
+          cp ./downloaded/*/output.csv ./output_full.csv
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Split batch 2 (second half)
+        run: |
+          python3 -c "
+          import csv
+          rows = list(csv.DictReader(open('output_full.csv')))
+          half = len(rows) // 2
+          batch = rows[half:]
+          with open('batch2.csv','w',newline='',encoding='utf-8') as f:
+              w = csv.DictWriter(f, fieldnames=rows[0].keys())
+              w.writeheader(); w.writerows(batch)
+          print(f'Batch 2: {len(batch)} clinics')
+          "
+
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - run: pip install requests beautifulsoup4 duckduckgo-search
+
+      - name: Run enrichment batch 2
+        env:
+          INPUT_FILE: batch2.csv
+          OUTPUT_FILE: enriched_batch2.csv
+        run: python enrich.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: istanbul-enriched-batch2-run${{ github.run_number }}
+          path: enriched_batch2.csv
+          retention-days: 30
+
+  # ── Merge: une los dos batches en un solo CSV ─────────────────────────────────
+  merge:
+    runs-on: ubuntu-latest
+    needs: [enrich_europe, enrich_asia]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download both batches
+        run: |
+          gh run download ${{ github.run_id }} \
+            --repo ${{ github.repository }} \
+            --pattern "istanbul-enriched-batch*" \
+            --dir ./batches
+          ls -lh batches/
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge CSVs + dedup
+        run: |
+          python3 -c "
+          import csv, glob, os
+
+          files = glob.glob('batches/*/enriched_batch*.csv')
+          print('Files found:', files)
+
+          all_rows = []
+          fieldnames = None
+          for f in sorted(files):
+              with open(f, encoding='utf-8') as fp:
+                  reader = csv.DictReader(fp)
+                  if not fieldnames: fieldnames = reader.fieldnames
+                  all_rows.extend(list(reader))
+
+          # Dedup by place_id
+          seen = set()
+          unique = []
+          for r in all_rows:
+              pid = r.get('place_id') or r.get('cid') or r.get('title','')
+              if pid not in seen:
+                  seen.add(pid)
+                  unique.append(r)
+
+          with open('istanbul_enriched.csv','w',newline='',encoding='utf-8') as f:
+              w = csv.DictWriter(f, fieldnames=fieldnames)
+              w.writeheader(); w.writerows(unique)
+
+          total = len(unique)
+          print(f'Total unique: {total}')
+          print(f'Email:     {sum(1 for r in unique if r.get(\"emails\",\"\").strip())}')
+          print(f'WhatsApp:  {sum(1 for r in unique if r.get(\"whatsapp\",\"\").strip())}')
+          print(f'Instagram: {sum(1 for r in unique if r.get(\"instagram\",\"\").strip())}')
+          print(f'Facebook:  {sum(1 for r in unique if r.get(\"facebook\",\"\").strip())}')
+          print(f'Website:   {sum(1 for r in unique if r.get(\"website\",\"\").strip())}')
+          "
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: istanbul-dental-leads-FINAL-run${{ github.run_number }}
+          path: istanbul_enriched.csv
+          retention-days: 60
