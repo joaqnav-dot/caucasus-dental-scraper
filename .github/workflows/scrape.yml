@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       queries_file:
-        description: 'Queries file to use (georgia.txt / queries.txt)'
+        description: 'Queries file to use'
         required: true
         default: 'queries.txt'
         type: choice
@@ -15,11 +15,17 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Strip comments from queries file
+        run: |
+          grep -v '^\s*#' ${{ github.event.inputs.queries_file }} | grep -v '^\s*$' > queries_clean.txt
+          echo "Queries to run:"
+          cat queries_clean.txt
 
       - name: Pull scraper image
         run: docker pull gosom/google-maps-scraper
@@ -29,20 +35,53 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}:/data \
             gosom/google-maps-scraper \
-            -input  "/data/${{ github.event.inputs.queries_file }}" \
-            -results "/data/output.csv" \
+            -input   "/data/queries_clean.txt" \
+            -results "/data/output_raw.csv" \
             -lang en \
             -email \
             -c 4
 
-      - name: Show results
+      - name: Deduplicate by place_id
         run: |
-          echo "Total clinics scraped:"
-          tail -n +2 output.csv | wc -l
+          python3 - <<'EOF'
+          import csv
 
-      - name: Upload CSV as artifact
+          with open('output_raw.csv', newline='', encoding='utf-8') as f:
+              rows = list(csv.DictReader(f))
+
+          seen = set()
+          unique = []
+          for r in rows:
+              pid = r.get('place_id') or r.get('cid') or r.get('title')
+              if pid not in seen:
+                  seen.add(pid)
+                  unique.append(r)
+
+          if unique:
+              with open('output.csv', 'w', newline='', encoding='utf-8') as f:
+                  writer = csv.DictWriter(f, fieldnames=unique[0].keys())
+                  writer.writeheader()
+                  writer.writerows(unique)
+
+          print(f"Raw: {len(rows)} | After dedup: {len(unique)} | Removed: {len(rows)-len(unique)}")
+          EOF
+
+      - name: Summary
+        run: |
+          echo "=== FINAL RESULTS ==="
+          tail -n +2 output.csv | wc -l
+          echo "clinics scraped"
+          echo "With email:"
+          python3 -c "
+          import csv
+          rows = list(csv.DictReader(open('output.csv')))
+          print(sum(1 for r in rows if r.get('emails','').strip()), 'clinics with email')
+          print(sum(1 for r in rows if r.get('phone','').strip()), 'clinics with phone')
+          "
+
+      - name: Upload CSV
         uses: actions/upload-artifact@v4
         with:
-          name: dental-leads-${{ github.event.inputs.queries_file }}-${{ github.run_number }}
+          name: caucasus-dental-leads-run${{ github.run_number }}
           path: output.csv
           retention-days: 30
