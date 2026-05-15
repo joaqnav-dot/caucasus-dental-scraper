@@ -1,69 +1,69 @@
 # GEORGIA — Tbilisi por barrios
-dental clinic in Vake Tbilisi
-dental clinic in Saburtalo Tbilisi
-dental clinic in Mtatsminda Tbilisi
-dental clinic in Isani Tbilisi
-dental clinic in Samgori Tbilisi
-dental clinic in Didube Tbilisi
-dental clinic in Nadzaladevi Tbilisi
-dental clinic in Gldani Tbilisi
-dental clinic in Varketili Tbilisi
-dental clinic in Old Town Tbilisi
-dental clinic in Avlabari Tbilisi
-dental clinic in Ortachala Tbilisi
-dental clinic in Didi Dighomi Tbilisi
-dental clinic in Lisi Tbilisi
+dental clinic in Vake, Tbilisi, Georgia
+dental clinic in Saburtalo, Tbilisi, Georgia
+dental clinic in Mtatsminda, Tbilisi, Georgia
+dental clinic in Isani, Tbilisi, Georgia
+dental clinic in Samgori, Tbilisi, Georgia
+dental clinic in Didube, Tbilisi, Georgia
+dental clinic in Nadzaladevi, Tbilisi, Georgia
+dental clinic in Gldani, Tbilisi, Georgia
+dental clinic in Varketili, Tbilisi, Georgia
+dental clinic in Old Town, Tbilisi, Georgia
+dental clinic in Avlabari, Tbilisi, Georgia
+dental clinic in Ortachala, Tbilisi, Georgia
+dental clinic in Didi Dighomi, Tbilisi, Georgia
+dental clinic in Lisi, Tbilisi, Georgia
 # GEORGIA — otras ciudades
-dental clinic in Batumi
-dental clinic in Kutaisi
-dental clinic in Rustavi
-dental clinic in Gori
-dental clinic in Zugdidi
-dental clinic in Samtredia
-dental clinic in Poti
-dental clinic in Khashuri
-dental clinic in Zestafoni
-dental clinic in Marneuli
-dental clinic in Telavi
-dental clinic in Ozurgeti
+dental clinic in Batumi, Georgia
+dental clinic in Kutaisi, Georgia
+dental clinic in Rustavi, Georgia
+dental clinic in Gori, Georgia
+dental clinic in Zugdidi, Georgia
+dental clinic in Samtredia, Georgia
+dental clinic in Poti, Georgia
+dental clinic in Khashuri, Georgia
+dental clinic in Zestafoni, Georgia
+dental clinic in Marneuli, Georgia
+dental clinic in Telavi, Georgia
+dental clinic in Ozurgeti, Georgia
 # ARMENIA — Yerevan por barrios
-dental clinic in Kentron Yerevan
-dental clinic in Arabkir Yerevan
-dental clinic in Kanaker-Zeytun Yerevan
-dental clinic in Malatia-Sebastia Yerevan
-dental clinic in Nor Nork Yerevan
-dental clinic in Nork-Marash Yerevan
-dental clinic in Erebuni Yerevan
-dental clinic in Shengavit Yerevan
-dental clinic in Avan Yerevan
-dental clinic in Davtashen Yerevan
-dental clinic in Ajapnyak Yerevan
+dental clinic in Kentron, Yerevan, Armenia
+dental clinic in Arabkir, Yerevan, Armenia
+dental clinic in Kanaker-Zeytun, Yerevan, Armenia
+dental clinic in Malatia-Sebastia, Yerevan, Armenia
+dental clinic in Nor Nork, Yerevan, Armenia
+dental clinic in Nork-Marash, Yerevan, Armenia
+dental clinic in Erebuni, Yerevan, Armenia
+dental clinic in Shengavit, Yerevan, Armenia
+dental clinic in Avan, Yerevan, Armenia
+dental clinic in Davtashen, Yerevan, Armenia
+dental clinic in Ajapnyak, Yerevan, Armenia
 # ARMENIA — otras ciudades
-dental clinic in Gyumri
-dental clinic in Vanadzor
-dental clinic in Abovyan
-dental clinic in Vagharshapat
-dental clinic in Kapan
-dental clinic in Artashat
-dental clinic in Ashtarak
-dental clinic in Sevan
+dental clinic in Gyumri, Armenia
+dental clinic in Vanadzor, Armenia
+dental clinic in Abovyan, Armenia
+dental clinic in Vagharshapat, Armenia
+dental clinic in Kapan, Armenia
+dental clinic in Artashat, Armenia
+dental clinic in Ashtarak, Armenia
+dental clinic in Sevan, Armenia
 # AZERBAIJAN — Baku por barrios
-dental clinic in Nasimi Baku
-dental clinic in Sabail Baku
-dental clinic in Yasamal Baku
-dental clinic in Nizami Baku
-dental clinic in Binagadi Baku
-dental clinic in Sabunchu Baku
-dental clinic in Surakhani Baku
-dental clinic in Khazar Baku
-dental clinic in Garadagh Baku
-dental clinic in Absheron Baku
+dental clinic in Nasimi, Baku, Azerbaijan
+dental clinic in Sabail, Baku, Azerbaijan
+dental clinic in Yasamal, Baku, Azerbaijan
+dental clinic in Nizami, Baku, Azerbaijan
+dental clinic in Binagadi, Baku, Azerbaijan
+dental clinic in Sabunchu, Baku, Azerbaijan
+dental clinic in Surakhani, Baku, Azerbaijan
+dental clinic in Khazar, Baku, Azerbaijan
+dental clinic in Garadagh, Baku, Azerbaijan
+dental clinic in Absheron, Baku, Azerbaijan
 # AZERBAIJAN — otras ciudades
-dental clinic in Ganja
-dental clinic in Sumqayit
-dental clinic in Lankaran
-dental clinic in Mingachevir
-dental clinic in Shaki
-dental clinic in Zagatala
-dental clinic in Shamakhi
-dental clinic in Ismailli
+dental clinic in Ganja, Azerbaijan
+dental clinic in Sumqayit, Azerbaijan
+dental clinic in Lankaran, Azerbaijan
+dental clinic in Mingachevir, Azerbaijan
+dental clinic in Shaki, Azerbaijan
+dental clinic in Zagatala, Azerbaijan
+dental clinic in Shamakhi, Azerbaijan
+dental clinic in Ismailli, Azerbaijan
