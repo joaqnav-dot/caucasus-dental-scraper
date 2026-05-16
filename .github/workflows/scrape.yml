@@ -1,4 +1,4 @@
-name: Caucasus Dental Scraper
+name: Dental Clinic Scraper
 
 on:
   workflow_dispatch:
@@ -12,11 +12,13 @@ on:
           - queries.txt
           - georgia.txt
           - istanbul.txt
+          - istanbul_europe.txt
+          - istanbul_asia.txt
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 330
 
     steps:
       - name: Checkout repo
@@ -31,7 +33,7 @@ jobs:
       - name: Pull scraper image
         run: docker pull gosom/google-maps-scraper
 
-      - name: Run scraper
+      - name: Run scraper (no email — handled by enrichment)
         run: |
           docker run --rm \
             -v ${{ github.workspace }}:/data \
@@ -39,8 +41,7 @@ jobs:
             -input   "/data/queries_clean.txt" \
             -results "/data/output_raw.csv" \
             -lang en \
-            -email \
-            -c 4
+            -c 6
 
       - name: Deduplicate by place_id
         run: |
@@ -69,20 +70,19 @@ jobs:
 
       - name: Summary
         run: |
-          echo "=== FINAL RESULTS ==="
-          tail -n +2 output.csv | wc -l
-          echo "clinics scraped"
-          echo "With email:"
+          echo "=== RESULTS ==="
+          TOTAL=$(tail -n +2 output.csv | wc -l)
+          echo "$TOTAL clinics scraped"
           python3 -c "
           import csv
           rows = list(csv.DictReader(open('output.csv')))
-          print(sum(1 for r in rows if r.get('emails','').strip()), 'clinics with email')
-          print(sum(1 for r in rows if r.get('phone','').strip()), 'clinics with phone')
+          print(sum(1 for r in rows if r.get('phone','').strip()), 'with phone')
+          print(sum(1 for r in rows if r.get('website','').strip()), 'with website')
           "
 
       - name: Upload CSV
         uses: actions/upload-artifact@v4
         with:
-          name: caucasus-dental-leads-run${{ github.run_number }}
+          name: dental-leads-${{ github.event.inputs.queries_file }}-run${{ github.run_number }}
           path: output.csv
           retention-days: 30
