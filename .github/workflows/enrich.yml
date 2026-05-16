@@ -4,54 +4,43 @@ on:
   workflow_dispatch:
     inputs:
       run_id:
-        description: 'Run ID from scraper workflow (leave empty to use latest)'
-        required: false
-        default: ''
-
-permissions:
-  actions: read
-  contents: read
+        description: 'Run ID from scraper workflow'
+        required: true
+      city_name:
+        description: 'City name for artifact naming (e.g. ankara, izmir)'
+        required: true
 
 jobs:
   enrich:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 350
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Download latest scraper output
+      - name: Download scraper output
         run: |
-          if [ -n "${{ github.event.inputs.run_id }}" ]; then
-            RUN_ID="${{ github.event.inputs.run_id }}"
-          else
-            RUN_ID=$(gh run list --repo ${{ github.repository }} --workflow=scrape.yml --status=success --limit=1 --json databaseId --jq '.[0].databaseId')
-          fi
-          echo "Using scraper run ID: $RUN_ID"
-          gh run download $RUN_ID --repo ${{ github.repository }} --pattern "caucasus-dental-leads-*" --dir ./downloaded
-          cp ./downloaded/*/output.csv ./output.csv
-          echo "Loaded $(wc -l < output.csv) rows"
+          gh run download ${{ github.event.inputs.run_id }} \
+            --repo ${{ github.repository }} \
+            --dir ./downloaded
+          find ./downloaded -name "*.csv" | head -1 | xargs -I{} cp {} ./input.csv
+          echo "Rows: $(wc -l < input.csv)"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
 
-      - name: Install dependencies
-        run: pip install requests beautifulsoup4 duckduckgo-search
+      - run: pip install requests beautifulsoup4 duckduckgo-search
 
       - name: Run enrichment
         env:
-          INPUT_FILE: output.csv
+          INPUT_FILE: input.csv
           OUTPUT_FILE: enriched.csv
         run: python enrich.py
 
-      - name: Upload enriched CSV
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: caucasus-dental-enriched-run${{ github.run_number }}
+          name: enriched-${{ github.event.inputs.city_name }}-run${{ github.run_number }}
           path: enriched.csv
-          retention-days: 30
+          retention-days: 60
